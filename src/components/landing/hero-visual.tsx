@@ -26,23 +26,23 @@ function useCountUp(target: number, ms = 1400) {
 const bars = [42, 58, 35, 70, 52, 88, 64];
 
 function Dashboard() {
-  const rev = useCountUp(1.21);
-  const cust = useCountUp(202);
+  const rev = useCountUp(2.07);
+  const cust = useCountUp(217);
   return (
     <div className="w-[420px] max-w-full rounded-2xl border border-[#E3EEF0] bg-white p-5 shadow-[0_30px_70px_-30px_rgba(12,74,90,0.45)]">
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="h-2 w-2 rounded-full" style={{ background: "#16804b", animation: "v-blink 1.6s infinite" }} />
-          <span className="text-xs font-semibold uppercase tracking-wide text-[#51707A]">Executive Summary · Live</span>
+          <span className="text-xs font-semibold uppercase tracking-wide text-[#51707A]">Marlowe Trading · Live</span>
         </div>
         <span className="rounded-md bg-[#EAF6F8] px-2 py-0.5 text-[10px] font-semibold text-[#0E6478]">FY 2026</span>
       </div>
 
       <div className="grid grid-cols-3 gap-2.5">
         {[
-          { label: "Revenue MTD", value: `R${rev.toFixed(2)}M`, sub: "▲ 18%" },
-          { label: "Target pace", value: "102%", sub: "On track" },
-          { label: "Customers", value: String(Math.round(cust)), sub: "▲ 12" },
+          { label: "Revenue MTD", value: `R${rev.toFixed(2)}M`, sub: "▲ 14%" },
+          { label: "Target pace", value: "103%", sub: "On track" },
+          { label: "Customers", value: String(Math.round(cust)), sub: "▲ 9" },
         ].map((k) => (
           <div key={k.label} className="rounded-xl bg-[#F4FBFC] p-2.5">
             <p className="text-[9px] font-semibold uppercase tracking-wide text-[#7e98a0]">{k.label}</p>
@@ -66,14 +66,15 @@ function Dashboard() {
       </div>
 
       <div className="mt-3 flex items-center justify-between text-[11px] text-[#51707A]">
-        <span className="flex items-center gap-1 font-medium text-[#127D92]"><TrendingUp className="h-3.5 w-3.5" /> Sales rep achievement</span>
-        <span className="flex items-center gap-1 font-semibold text-[#0A2A31]">124% <ArrowUpRight className="h-3 w-3 text-[#16804b]" /></span>
+        <span className="flex items-center gap-1 font-medium text-[#127D92]"><TrendingUp className="h-3.5 w-3.5" /> Top rep achievement</span>
+        <span className="flex items-center gap-1 font-semibold text-[#0A2A31]">117% <ArrowUpRight className="h-3 w-3 text-[#16804b]" /></span>
       </div>
     </div>
   );
 }
 
 const QUESTION = "Which rep is furthest behind target this month?";
+const ANSWER_REP = "Theo Almeida";
 
 function Chatbot() {
   const [typed, setTyped] = useState("");
@@ -120,12 +121,12 @@ function Chatbot() {
             </span>
           ) : (
             <>
-              <p><b>Crystal Jumat</b> — 29% of target (<span className="text-[#c4321c]">−R136k</span>).</p>
+              <p><b>{ANSWER_REP}</b> — 34% of target (<span className="text-[#c4321c]">−R142k</span>).</p>
               <div className="mt-2 flex items-center gap-2">
-                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[#e0eef1]"><div className="h-full rounded-full" style={{ width: "29%", background: "#c4321c" }} /></div>
-                <span className="text-[11px] font-semibold text-[#51707A]">29%</span>
+                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[#e0eef1]"><div className="h-full rounded-full" style={{ width: "34%", background: "#c4321c" }} /></div>
+                <span className="text-[11px] font-semibold text-[#51707A]">34%</span>
               </div>
-              <p className="mt-1.5 text-[11px] text-[#51707A]">3 customers driving the gap. Want the breakdown?</p>
+              <p className="mt-1.5 text-[11px] text-[#51707A]">4 accounts driving the gap. Want the breakdown?</p>
             </>
           )}
         </motion.div>

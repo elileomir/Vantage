@@ -89,8 +89,8 @@ export function VantageLanding() {
       {/* TRUST */}
       <section className="border-y border-[#EEF5F6] bg-[#F9FCFD]">
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-3 px-5 py-8 text-center sm:flex-row sm:justify-between sm:text-left">
-          <p className="text-sm font-medium" style={{ color: SLATE }}>Running live, every day — built with <b style={{ color: INK }}>KRDM Innovative Homeware</b>.</p>
-          <p className="text-sm" style={{ color: "#8aa3aa" }}>Replacing spreadsheet exports & per-seat report licences.</p>
+          <p className="text-sm font-medium" style={{ color: SLATE }}>From scattered spreadsheets to one live workspace — live in days, not quarters.</p>
+          <p className="text-sm" style={{ color: "#8aa3aa" }}>No exports. No per-seat licences. One source of truth.</p>
         </div>
       </section>
 
