@@ -1,8 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Don't let an ESLint rule fail the production build on Vercel (TypeScript checks still run).
-  eslint: { ignoreDuringBuilds: true },
+  /* Next 16 (Turbopack) runs TypeScript during build, not ESLint — no eslint key here. */
 };
 
 export default nextConfig;
