@@ -36,3 +36,9 @@ reference/
 
 # Reverse-engineering temp output is project-specific and may include local paths.
 .re/tmp/
+
+# Local preview config (machine-specific port)
+.claude/launch.json
+
+# TS incremental build cache
+*.tsbuildinfo

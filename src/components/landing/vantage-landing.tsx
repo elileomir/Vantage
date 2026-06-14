@@ -66,11 +66,11 @@ export function VantageLanding() {
       <section className="relative overflow-hidden">
         <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(900px 500px at 78% -8%, #DDF1F5 0%, transparent 60%), radial-gradient(700px 400px at 0% 0%, #F0FAFB 0%, transparent 55%)" }} />
         <div className="relative mx-auto grid max-w-6xl items-center gap-14 px-5 py-16 lg:grid-cols-[1.05fr_1fr] lg:py-24">
-          <div>
+          <div className="min-w-0">
             <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="inline-flex items-center gap-2 rounded-full border border-[#CFE7EC] bg-[#F4FBFC] px-3 py-1 text-xs font-semibold" style={{ color: BRAND }}>
               <span className="h-1.5 w-1.5 rounded-full" style={{ background: "#18A8C4" }} /> Reporting, reinvented for teams
             </motion.span>
-            <motion.h1 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="mt-5 text-[2.6rem] font-extrabold leading-[1.06] tracking-tight sm:text-[3.4rem]">
+            <motion.h1 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="mt-5 text-[2.15rem] font-extrabold leading-[1.07] tracking-tight sm:text-[3.4rem]">
               Turn messy data into dashboards your <span className="v-grad-text">whole team</span> actually reads.
             </motion.h1>
             <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }} className="mt-5 max-w-xl text-lg leading-relaxed" style={{ color: SLATE }}>
@@ -82,7 +82,7 @@ export function VantageLanding() {
             </motion.div>
             <p className="mt-5 text-sm" style={{ color: "#7e98a0" }}>No per-seat licences · Invite your whole team · Live on every device</p>
           </div>
-          <div className="lg:pl-6"><HeroVisual /></div>
+          <div className="min-w-0 lg:pl-6"><HeroVisual /></div>
         </div>
       </section>
 

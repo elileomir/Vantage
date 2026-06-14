@@ -136,7 +136,7 @@ function Chatbot() {
 
 export function HeroVisual() {
   return (
-    <div className="relative mx-auto w-fit" style={{ perspective: "1400px" }}>
+    <div className="relative mx-auto w-full max-w-[440px]" style={{ perspective: "1400px" }}>
       <motion.div
         initial={{ opacity: 0, rotateY: 14, rotateX: 8, y: 24 }}
         animate={{ opacity: 1, rotateY: -8, rotateX: 6, y: 0 }}
