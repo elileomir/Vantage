@@ -9,7 +9,7 @@ import {
 } from "@/components/charts/echarts";
 import { KRDM, ragColor } from "@/components/charts/theme";
 import { ExecTrend, type TrendDatum, type TrendSeriesMap } from "@/components/charts/exec-trend";
-import { RepCustomerMatrix } from "@/app/dashboard/_components/rep-customer-matrix";
+import { RepCustomerMatrix } from "@/app/krdm/_components/rep-customer-matrix";
 import { ReportHeader } from "@/components/report-header";
 import { EmptyState } from "@/components/empty-state";
 

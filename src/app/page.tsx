@@ -1,15 +1,6 @@
-import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+// Public marketing landing for Vantage (the SaaS). The KRDM client dashboard lives at /krdm.
+import { VantageLanding } from "@/components/landing/vantage-landing";
 
-export default async function Home() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (user) {
-    redirect("/dashboard");
-  } else {
-    redirect("/login");
-  }
+export default function HomePage() {
+  return <VantageLanding />;
 }

@@ -28,19 +28,19 @@ const navSections = [
     label: "Analytics",
     items: [
       // Order mirrors the Power BI report pages.
-      { label: "Executive Summary", href: "/dashboard", icon: LayoutDashboard },
-      { label: "Brand & Product", href: "/dashboard/brands", icon: ShoppingBag },
-      { label: "Sales Representative", href: "/dashboard/reps", icon: UserCheck },
-      { label: "Customer Analysis", href: "/dashboard/customers", icon: Users },
-      { label: "Tabular Summary", href: "/dashboard/tabular", icon: Table2 },
-      { label: "Daily", href: "/dashboard/daily", icon: CalendarDays },
+      { label: "Executive Summary", href: "/krdm", icon: LayoutDashboard },
+      { label: "Brand & Product", href: "/krdm/brands", icon: ShoppingBag },
+      { label: "Sales Representative", href: "/krdm/reps", icon: UserCheck },
+      { label: "Customer Analysis", href: "/krdm/customers", icon: Users },
+      { label: "Tabular Summary", href: "/krdm/tabular", icon: Table2 },
+      { label: "Daily", href: "/krdm/daily", icon: CalendarDays },
     ],
   },
   {
     label: "Management",
     items: [
-      { label: "Targets", href: "/dashboard/targets", icon: Target },
-      { label: "Settings", href: "/dashboard/settings", icon: Settings },
+      { label: "Targets", href: "/krdm/targets", icon: Target },
+      { label: "Settings", href: "/krdm/settings", icon: Settings },
     ],
   },
 ];
@@ -65,8 +65,8 @@ export default function DashboardLayout({
   }
 
   function isActive(href: string) {
-    return href === "/dashboard"
-      ? pathname === "/dashboard"
+    return href === "/krdm"
+      ? pathname === "/krdm"
       : pathname.startsWith(href);
   }
 
@@ -104,7 +104,7 @@ export default function DashboardLayout({
           style={{ borderBottom: "1px solid #edebe7" }}
         >
           {!collapsed && (
-            <Link href="/dashboard" className="flex items-center gap-2">
+            <Link href="/krdm" className="flex items-center gap-2">
               <div
                 className="flex h-7 w-7 items-center justify-center rounded-md"
                 style={{ background: "#a1145c" }}

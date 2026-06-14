@@ -29,21 +29,23 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Redirect unauthenticated users to login (except login page itself)
-  if (
-    !user &&
-    !request.nextUrl.pathname.startsWith("/login") &&
-    !request.nextUrl.pathname.startsWith("/auth")
-  ) {
+  const path = request.nextUrl.pathname;
+  // Public (no auth required): marketing landing, T&C/privacy, contact webhook proxy, auth flow.
+  const isPublic =
+    path === "/" ||
+    ["/login", "/auth", "/terms", "/privacy", "/api/contact"].some((p) => path.startsWith(p));
+
+  // Gate everything else (the /krdm client app) behind auth.
+  if (!user && !isPublic) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
 
-  // Redirect authenticated users away from login page
-  if (user && request.nextUrl.pathname.startsWith("/login")) {
+  // Signed-in users hitting the login page go straight to their dashboard.
+  if (user && path.startsWith("/login")) {
     const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
+    url.pathname = "/krdm";
     return NextResponse.redirect(url);
   }
 

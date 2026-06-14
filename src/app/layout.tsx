@@ -15,9 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Vantage | Sales Intelligence",
+  title: "Vantage — Turn messy data into dashboards your team reads",
   description:
-    "Sales intelligence and performance management platform",
+    "Vantage connects, cleans and keeps your business data live — then lets anyone ask questions in plain language and get answers on any device. One subscription for your whole team.",
 };
 
 export default function RootLayout({

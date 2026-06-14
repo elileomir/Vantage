@@ -49,6 +49,6 @@ export async function updateTargetCell(input: {
     return { ok: false, error: "No matching target row, or your role cannot edit targets." };
   }
 
-  revalidatePath("/dashboard/targets");
+  revalidatePath("/krdm/targets");
   return { ok: true };
 }

@@ -497,3 +497,37 @@ select.slicer-control {
   }
   .live-dot { animation: none; }
 }
+
+/* ============================================
+   Vantage brand (marketing landing)
+   ============================================ */
+:root {
+  --v-deep: #0C4A5A;
+  --v-brand: #0E6478;
+  --v-mid: #127D92;
+  --v-accent: #18A8C4;
+  --v-accent2: #36C6DD;
+  --v-tint: #EAF6F8;
+  --v-tint2: #F4FBFC;
+  --v-ink: #0A2A31;
+  --v-slate: #51707A;
+  --v-line: #DBE9EC;
+}
+.v-grad-text {
+  background: linear-gradient(95deg, var(--v-brand), var(--v-accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.v-btn {
+  display: inline-flex; align-items: center; gap: 0.5rem; height: 46px; padding: 0 1.35rem;
+  border-radius: 999px; font-weight: 600; font-size: 0.95rem; transition: all .18s var(--ease-out);
+  white-space: nowrap;
+}
+.v-btn-primary { background: var(--v-brand); color: #fff; box-shadow: 0 8px 20px -8px rgba(14,100,120,.6); }
+.v-btn-primary:hover { background: var(--v-deep); transform: translateY(-1px); box-shadow: 0 12px 26px -8px rgba(14,100,120,.7); }
+.v-btn-ghost { background: #fff; color: var(--v-ink); border: 1px solid var(--v-line); }
+.v-btn-ghost:hover { border-color: var(--v-accent); color: var(--v-brand); }
+@keyframes v-float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+@keyframes v-blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+@keyframes v-grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }

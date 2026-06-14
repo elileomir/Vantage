@@ -14,7 +14,7 @@ export async function setFiscalYearStart(
   const { error } = await supabase.rpc("set_fiscal_year_start", { p_month: month });
   if (error) return { ok: false, error: error.message };
   // Recomputed calendar affects every dashboard; refresh the whole dashboard tree.
-  revalidatePath("/dashboard", "layout");
+  revalidatePath("/krdm", "layout");
   return { ok: true };
 }
 
@@ -44,7 +44,7 @@ export async function setSyncTier(tier: string): Promise<{ ok: boolean; error?: 
     .update({ sync_tier: tier, sync_frequency_minutes: TIER_FREQUENCY[tier], updated_at: new Date().toISOString() })
     .eq("id", member.org_id);
   if (error) return { ok: false, error: error.message };
-  revalidatePath("/dashboard/settings");
+  revalidatePath("/krdm/settings");
   return { ok: true };
 }
 
@@ -57,7 +57,7 @@ export async function addExclusion(value: string, label: string): Promise<{ ok: 
     .from("sales_exclusions")
     .upsert({ value: v, label: label.trim() || value.trim() }, { onConflict: "value" });
   if (error) return { ok: false, error: error.message };
-  revalidatePath("/dashboard", "layout"); // affects every Sales total
+  revalidatePath("/krdm", "layout"); // affects every Sales total
   return { ok: true };
 }
 
@@ -65,6 +65,6 @@ export async function removeExclusion(value: string): Promise<{ ok: boolean; err
   const supabase = await createClient();
   const { error } = await supabase.from("sales_exclusions").delete().eq("value", value);
   if (error) return { ok: false, error: error.message };
-  revalidatePath("/dashboard", "layout");
+  revalidatePath("/krdm", "layout");
   return { ok: true };
 }
