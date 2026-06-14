@@ -1,0 +1,48 @@
+{
+  "name": "app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3001",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "inspect:targets": "node scripts/inspect-targets.mjs --dry-run",
+    "import:sales": "node scripts/import-sales.mjs",
+    "import:targets": "node scripts/import-targets.mjs",
+    "sync:holidays": "node scripts/sync-holidays.mjs",
+    "import:holidays": "node scripts/import-holidays.mjs",
+    "sync:cin7": "node scripts/sync-cin7-sales.mjs",
+    "sync:cin7:delta": "node --env-file=.env.local scripts/sync-cin7-sales.mjs --incremental",
+    "sync:auto": "node --env-file=.env.local scripts/auto-sync.mjs",
+    "backfill:history": "node scripts/backfill-history.mjs"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.10.3",
+    "@supabase/supabase-js": "^2.108.0",
+    "@tanstack/react-table": "^8.21.3",
+    "@tanstack/react-virtual": "^3.14.2",
+    "@xyflow/react": "^12.11.0",
+    "date-fns": "^4.4.0",
+    "dotenv": "^17.4.2",
+    "echarts": "^6.1.0",
+    "echarts-for-react": "^3.0.6",
+    "lucide-react": "^1.17.0",
+    "motion": "^12.40.0",
+    "next": "16.2.7",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "recharts": "^3.8.1",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.7",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}

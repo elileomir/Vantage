@@ -1,0 +1,789 @@
+{
+  "$schema": "app-knowledge-v1",
+  "metadata": {
+    "repo_path": "/Users/elijahmirandilla/Developer/elileomir/KRDM Report",
+    "repo_name": "KRDM Report",
+    "analyzed_at": "2026-06-08T22:25:00+08:00",
+    "last_updated": "2026-06-08T22:56:00+08:00",
+    "analysis_version": "reverse-engineering skill",
+    "total_files": 91,
+    "total_lines": 4919,
+    "languages": [
+      "JSON",
+      "TypeScript",
+      "CSS",
+      "JavaScript",
+      "Markdown"
+    ],
+    "primary_language": "TypeScript",
+    "framework": "Next.js 16.2.7",
+    "runtime": "Node.js / Next.js",
+    "package_manager": "npm",
+    "monorepo": false,
+    "scan_completeness": "partial-deep-updated-after-batch-1"
+  },
+  "architecture": {
+    "type": "single-tenant web app",
+    "pattern": "Next.js App Router with component-local dashboard widgets",
+    "framework": "Next.js",
+    "rendering": "hybrid SSR and CSR",
+    "state_management": "React local state only",
+    "api_style": "no app API routes yet",
+    "styling": "Tailwind CSS v4 plus global CSS tokens",
+    "testing_framework": null,
+    "directory_structure": {
+      "description": "Small Next.js app with source in src, dashboard components under src/app/dashboard/components, Supabase helpers under src/lib/supabase, and read-only reference artifacts under reference.",
+      "key_directories": {
+        "source": "src/",
+        "pages": "src/app/",
+        "api": "src/app/auth/callback/route.ts only",
+        "components": "src/app/dashboard/components/ and src/components/ui/",
+        "lib": "src/lib/",
+        "database": "no migrations in repo",
+        "public": "public/",
+        "tests": "none found",
+        "reference": "reference/"
+      }
+    }
+  },
+  "entry_points": [
+    {
+      "type": "route",
+      "path": "/",
+      "method": "GET",
+      "handler": "Home",
+      "file": "src/app/page.tsx",
+      "line": 4,
+      "middleware": [
+        "src/middleware.ts"
+      ],
+      "auth_required": false,
+      "description": "Server component redirects authenticated users to /dashboard and unauthenticated users to /login."
+    },
+    {
+      "type": "route",
+      "path": "/login",
+      "method": "GET",
+      "handler": "LoginPage",
+      "file": "src/app/login/page.tsx",
+      "line": 9,
+      "middleware": [
+        "src/middleware.ts"
+      ],
+      "auth_required": false,
+      "description": "Client-side Supabase email/password login page."
+    },
+    {
+      "type": "route",
+      "path": "/dashboard",
+      "method": "GET",
+      "handler": "ExecutiveSummaryPage",
+      "file": "src/app/dashboard/page.tsx",
+      "line": 10,
+      "middleware": [
+        "src/middleware.ts"
+      ],
+      "auth_required": true,
+      "description": "Protected executive summary dashboard using placeholder data."
+    },
+    {
+      "type": "api",
+      "path": "/auth/callback",
+      "method": "GET",
+      "handler": "GET",
+      "file": "src/app/auth/callback/route.ts",
+      "line": 4,
+      "middleware": [
+        "src/middleware.ts"
+      ],
+      "auth_required": false,
+      "description": "Supabase PKCE callback that exchanges code for session and redirects."
+    },
+    {
+      "type": "middleware",
+      "path": "all non-static routes",
+      "method": "ALL",
+      "handler": "middleware",
+      "file": "src/middleware.ts",
+      "line": 4,
+      "middleware": [],
+      "auth_required": false,
+      "description": "Invokes Supabase session update and redirects unauthenticated users."
+    }
+  ],
+  "pages": [
+    {
+      "route": "/",
+      "component": "Home",
+      "file": "src/app/page.tsx",
+      "layout": "src/app/layout.tsx",
+      "data_sources": [
+        "supabase.auth.getUser"
+      ],
+      "auth_required": false,
+      "dynamic": false,
+      "children_routes": [],
+      "description": "Redirect-only landing route."
+    },
+    {
+      "route": "/login",
+      "component": "LoginPage",
+      "file": "src/app/login/page.tsx",
+      "layout": "src/app/layout.tsx",
+      "data_sources": [
+        "supabase.auth.signInWithPassword"
+      ],
+      "auth_required": false,
+      "dynamic": false,
+      "children_routes": [],
+      "description": "Responsive login UI branded as Vantage."
+    },
+    {
+      "route": "/dashboard",
+      "component": "ExecutiveSummaryPage",
+      "file": "src/app/dashboard/page.tsx",
+      "layout": "src/app/dashboard/layout.tsx",
+      "data_sources": [
+        "src/lib/data/vantage.ts fixture boundary",
+        "future Supabase dashboard views"
+      ],
+      "auth_required": true,
+      "dynamic": false,
+      "children_routes": [
+        "/dashboard/customers",
+        "/dashboard/brands",
+        "/dashboard/reps",
+        "/dashboard/tabular",
+        "/dashboard/daily",
+        "/dashboard/targets",
+        "/dashboard/settings"
+      ],
+      "description": "Executive summary with filters, KPI cards, charts, and top customer table. Random chart fallback removed."
+    },
+    {
+      "route": "/dashboard/customers",
+      "component": "CustomerAnalysisPage",
+      "file": "src/app/dashboard/customers/page.tsx",
+      "layout": "src/app/dashboard/layout.tsx",
+      "data_sources": [
+        "src/lib/data/vantage.ts fixture boundary",
+        "future public.v_customer_revenue and public.v_sales_summary"
+      ],
+      "auth_required": true,
+      "dynamic": false,
+      "children_routes": [],
+      "description": "Customer analysis route with summary metrics, search/status filters, customer ranking, monthly pacing, and brand mix surfaces."
+    }
+  ],
+  "ui_elements": [
+    {
+      "type": "form",
+      "label": "Sign in form",
+      "action": "handleLogin",
+      "file": "src/app/login/page.tsx",
+      "line": 126,
+      "triggers": "supabase.auth.signInWithPassword",
+      "parent_page": "/login",
+      "conditions": "always visible"
+    },
+    {
+      "type": "button",
+      "label": "Sign in",
+      "action": "handleLogin",
+      "file": "src/app/login/page.tsx",
+      "line": 175,
+      "triggers": "submit login form",
+      "parent_page": "/login",
+      "conditions": "disabled while loading"
+    },
+    {
+      "type": "button",
+      "label": "Collapse sidebar / Expand sidebar",
+      "action": "setCollapsed",
+      "file": "src/app/dashboard/layout.tsx",
+      "line": 122,
+      "triggers": "local sidebar collapsed state",
+      "parent_page": "/dashboard",
+      "conditions": "desktop only"
+    },
+    {
+      "type": "button",
+      "label": "Open navigation",
+      "action": "setMobileOpen(true)",
+      "file": "src/app/dashboard/layout.tsx",
+      "line": 201,
+      "triggers": "open mobile sidebar",
+      "parent_page": "/dashboard",
+      "conditions": "mobile only"
+    },
+    {
+      "type": "button",
+      "label": "Close navigation",
+      "action": "setMobileOpen(false)",
+      "file": "src/app/dashboard/layout.tsx",
+      "line": 133,
+      "triggers": "close mobile sidebar",
+      "parent_page": "/dashboard",
+      "conditions": "mobile only; aria-label missing"
+    },
+    {
+      "type": "button",
+      "label": "Sign out",
+      "action": "handleSignOut",
+      "file": "src/app/dashboard/layout.tsx",
+      "line": 180,
+      "triggers": "supabase.auth.signOut",
+      "parent_page": "/dashboard",
+      "conditions": "dashboard shell"
+    },
+    {
+      "type": "nav",
+      "label": "Main navigation",
+      "action": "Link navigation",
+      "file": "src/app/dashboard/layout.tsx",
+      "line": 142,
+      "triggers": "route changes to dashboard pages",
+      "parent_page": "/dashboard",
+      "conditions": "dashboard shell; many target pages not implemented"
+    },
+    {
+      "type": "dropdown",
+      "label": "Fiscal Year, Quarter, Month, Sales Rep, Brand, Customer filters",
+      "action": "setFilter / clearFilter",
+      "file": "src/app/dashboard/components/filter-bar.tsx",
+      "line": 77,
+      "triggers": "local activeFilters state only",
+      "parent_page": "/dashboard",
+      "conditions": "some dropdowns have no options"
+    },
+    {
+      "type": "button",
+      "label": "Clear all",
+      "action": "setActiveFilters({})",
+      "file": "src/app/dashboard/components/filter-bar.tsx",
+      "line": 128,
+      "triggers": "clears local filters",
+      "parent_page": "/dashboard",
+      "conditions": "shown when active filters exist"
+    },
+    {
+      "type": "table",
+      "label": "Top Customers",
+      "action": "none",
+      "file": "src/app/dashboard/components/top-customers.tsx",
+      "line": 35,
+      "triggers": "renders sample or provided customer data",
+      "parent_page": "/dashboard",
+      "conditions": "always visible"
+    }
+  ],
+  "functions": [
+    {
+      "name": "createClient",
+      "file": "src/lib/supabase/client.ts",
+      "line": 3,
+      "purpose": "Create browser Supabase client.",
+      "params": [],
+      "returns": "Supabase browser client",
+      "calls": [
+        "createBrowserClient"
+      ],
+      "called_by": [
+        "LoginPage",
+        "DashboardLayout"
+      ],
+      "is_exported": true,
+      "is_async": false,
+      "complexity": "low"
+    },
+    {
+      "name": "createClient",
+      "file": "src/lib/supabase/server.ts",
+      "line": 4,
+      "purpose": "Create server Supabase client with Next cookies.",
+      "params": [],
+      "returns": "Supabase server client",
+      "calls": [
+        "cookies",
+        "createServerClient"
+      ],
+      "called_by": [
+        "Home",
+        "GET auth callback"
+      ],
+      "is_exported": true,
+      "is_async": true,
+      "complexity": "low"
+    },
+    {
+      "name": "updateSession",
+      "file": "src/lib/supabase/middleware.ts",
+      "line": 4,
+      "purpose": "Refresh Supabase session cookies and redirect based on auth state.",
+      "params": [
+        "request"
+      ],
+      "returns": "NextResponse",
+      "calls": [
+        "createServerClient",
+        "supabase.auth.getUser"
+      ],
+      "called_by": [
+        "middleware"
+      ],
+      "is_exported": true,
+      "is_async": true,
+      "complexity": "medium"
+    },
+    {
+      "name": "handleLogin",
+      "file": "src/app/login/page.tsx",
+      "line": 17,
+      "purpose": "Submit email/password login to Supabase.",
+      "params": [
+        "React.FormEvent"
+      ],
+      "returns": "Promise<void>",
+      "calls": [
+        "supabase.auth.signInWithPassword",
+        "router.push",
+        "router.refresh"
+      ],
+      "called_by": [
+        "login form onSubmit"
+      ],
+      "is_exported": false,
+      "is_async": true,
+      "complexity": "low"
+    },
+    {
+      "name": "handleSignOut",
+      "file": "src/app/dashboard/layout.tsx",
+      "line": 56,
+      "purpose": "Sign out through Supabase and return to login.",
+      "params": [],
+      "returns": "Promise<void>",
+      "calls": [
+        "supabase.auth.signOut",
+        "router.push",
+        "router.refresh"
+      ],
+      "called_by": [
+        "sign out button"
+      ],
+      "is_exported": false,
+      "is_async": true,
+      "complexity": "low"
+    },
+    {
+      "name": "callAPI",
+      "file": "scripts/test-cin7-api.mjs",
+      "line": 43,
+      "purpose": "Call CIN7 Core API with authentication headers.",
+      "params": [
+        "endpoint",
+        "params"
+      ],
+      "returns": "result object",
+      "calls": [
+        "fetch"
+      ],
+      "called_by": [
+        "testConnection",
+        "testEndpoint",
+        "main"
+      ],
+      "is_exported": false,
+      "is_async": true,
+      "complexity": "medium"
+    }
+  ],
+  "integrations": [
+    {
+      "type": "auth/database",
+      "service": "Supabase",
+      "purpose": "Auth now; intended database for sales, targets, and dashboard views.",
+      "sdk": "@supabase/ssr and @supabase/supabase-js",
+      "config_file": ".env.local",
+      "env_vars": [
+        "NEXT_PUBLIC_SUPABASE_URL",
+        "NEXT_PUBLIC_SUPABASE_ANON_KEY"
+      ],
+      "endpoints_used": [
+        "auth.getUser",
+        "auth.signInWithPassword",
+        "auth.exchangeCodeForSession",
+        "auth.signOut"
+      ],
+      "files_using": [
+        "src/lib/supabase/client.ts",
+        "src/lib/supabase/server.ts",
+        "src/lib/supabase/middleware.ts",
+        "src/app/page.tsx",
+        "src/app/login/page.tsx",
+        "src/app/auth/callback/route.ts",
+        "src/app/dashboard/layout.tsx",
+        "src/proxy.ts",
+        "supabase/migrations/20260608143000_create_vantage_sales_contract.sql"
+      ]
+    },
+    {
+      "type": "api",
+      "service": "CIN7 Core",
+      "purpose": "Sales, products, customers, brands, stock and other ERP data.",
+      "sdk": null,
+      "config_file": ".env.local and .env.example",
+      "env_vars": [
+        "CIN7_ACCOUNT_ID",
+        "CIN7_API_KEY",
+        "CIN7_BASE_URL"
+      ],
+      "endpoints_used": [
+        "me",
+        "saleList",
+        "product",
+        "customer",
+        "ref/brand",
+        "transactions"
+      ],
+      "files_using": [
+        "scripts/test-cin7-api.mjs",
+        "README.md",
+        "reference/api-docs/dearinventory.apib",
+        ".env.example"
+      ]
+    },
+    {
+      "type": "file",
+      "service": "Excel targets",
+      "purpose": "Sales target import for 2025 and 2026.",
+      "sdk": "xlsx",
+      "config_file": "reference/targets/",
+      "env_vars": [],
+      "endpoints_used": [],
+      "files_using": [
+        "reference/targets/KRDM Sales Target 2025.xlsx",
+        "reference/targets/KRDM Sales Target 2026.xlsx",
+        "scripts/inspect-targets.mjs"
+      ]
+    },
+    {
+      "type": "reference",
+      "service": "Power BI PBIX export",
+      "purpose": "Reference source for dashboard pages, DAX measures, filters and visual layout.",
+      "sdk": null,
+      "config_file": "reference/pbix-extracted/",
+      "env_vars": [],
+      "endpoints_used": [],
+      "files_using": [
+        "reference/pbix-extracted/DAXQueries/",
+        "reference/pbix-extracted/Report/Layout"
+      ]
+    }
+  ],
+  "database": {
+    "type": "Supabase/PostgreSQL intended",
+    "orm": null,
+    "schema_file": "supabase/migrations/20260608143000_create_vantage_sales_contract.sql",
+    "connection_string_env": "NEXT_PUBLIC_SUPABASE_URL",
+    "tables": [
+      "public.calendar",
+      "public.sales",
+      "public.sales_targets",
+      "public.sync_log",
+      "public.v_sales_summary",
+      "public.v_daily_sales",
+      "public.v_mtd_sales",
+      "public.v_ytd_sales",
+      "public.v_target_achievement",
+      "public.v_yoy_comparison",
+      "public.v_brand_revenue",
+      "public.v_customer_revenue",
+      "public.v_rep_revenue"
+    ],
+    "migrations_count": 1,
+    "seed_file": null,
+    "notes": [
+      "Local migration contract now exists but has not been applied to any Supabase project.",
+      "Current MCP session still only exposes sjziqdbyobfekcyljgpt, which appears unrelated to KRDM/Vantage.",
+      "Do not apply migrations or imports until project cbrqfqxwexhoguoazhgh is accessible or the user confirms a replacement KRDM project ref.",
+      "Target workbook dry-run normalizes 32,244 monthly rows from reference/targets."
+    ]
+  },
+  "data_flows": [
+    {
+      "name": "Login",
+      "trigger": "User submits login form",
+      "description": "Email/password credentials are sent to Supabase Auth from the browser, then the app routes to /dashboard.",
+      "steps": [
+        {
+          "step": 1,
+          "layer": "UI",
+          "file": "src/app/login/page.tsx",
+          "line": 126,
+          "action": "Form submit invokes handleLogin.",
+          "data_in": "email, password",
+          "data_out": "login event"
+        },
+        {
+          "step": 2,
+          "layer": "External",
+          "file": "src/app/login/page.tsx",
+          "line": 22,
+          "action": "supabase.auth.signInWithPassword validates credentials.",
+          "data_in": "email, password",
+          "data_out": "session or error"
+        },
+        {
+          "step": 3,
+          "layer": "UI",
+          "file": "src/app/login/page.tsx",
+          "line": 31,
+          "action": "On success, router pushes /dashboard and refreshes.",
+          "data_in": "session",
+          "data_out": "dashboard navigation"
+        }
+      ],
+      "error_handling": "Displays Supabase error message in a red alert.",
+      "auth_check": true
+    },
+    {
+      "name": "Route protection",
+      "trigger": "Any matched route request",
+      "description": "Middleware creates a Supabase server client, checks user, and redirects unauthenticated users.",
+      "steps": [
+        {
+          "step": 1,
+          "layer": "Middleware",
+          "file": "src/middleware.ts",
+          "line": 4,
+          "action": "middleware delegates to updateSession.",
+          "data_in": "NextRequest",
+          "data_out": "NextResponse"
+        },
+        {
+          "step": 2,
+          "layer": "External",
+          "file": "src/lib/supabase/middleware.ts",
+          "line": 28,
+          "action": "supabase.auth.getUser reads authenticated user.",
+          "data_in": "cookies",
+          "data_out": "user or null"
+        },
+        {
+          "step": 3,
+          "layer": "Middleware",
+          "file": "src/lib/supabase/middleware.ts",
+          "line": 32,
+          "action": "Unauthenticated users are redirected to /login.",
+          "data_in": "user null",
+          "data_out": "redirect"
+        }
+      ],
+      "error_handling": "No explicit error branch for getUser errors.",
+      "auth_check": true
+    },
+    {
+      "name": "Dashboard render",
+      "trigger": "Authenticated user visits /dashboard",
+      "description": "Dashboard renders local placeholder data into KPI, chart and table components.",
+      "steps": [
+        {
+          "step": 1,
+          "layer": "UI",
+          "file": "src/app/dashboard/page.tsx",
+          "line": 31,
+          "action": "Page passes data null to dashboard components.",
+          "data_in": "none",
+          "data_out": "null props"
+        },
+        {
+          "step": 2,
+          "layer": "UI",
+          "file": "src/app/dashboard/components/kpi-cards.tsx",
+          "line": 25,
+          "action": "KPI cards use placeholder metrics.",
+          "data_in": "null",
+          "data_out": "metric cards"
+        },
+        {
+          "step": 3,
+          "layer": "UI",
+          "file": "src/app/dashboard/components/daily-chart.tsx",
+          "line": 23,
+          "action": "Daily chart generates random sample data.",
+          "data_in": "null",
+          "data_out": "chart data"
+        },
+        {
+          "step": 4,
+          "layer": "UI",
+          "file": "src/app/dashboard/components/top-customers.tsx",
+          "line": 10,
+          "action": "Top customer table uses sample customers.",
+          "data_in": "null",
+          "data_out": "table rows"
+        }
+      ],
+      "error_handling": "No loading or error state because no data fetch exists.",
+      "auth_check": true
+    },
+    {
+      "name": "CIN7 API validation script",
+      "trigger": "Developer runs scripts/test-cin7-api.mjs",
+      "description": "Node script attempts to test CIN7 endpoints and pagination.",
+      "steps": [
+        {
+          "step": 1,
+          "layer": "Service",
+          "file": "scripts/test-cin7-api.mjs",
+          "line": 155,
+          "action": "main starts connection and endpoint tests.",
+          "data_in": "process env and constants",
+          "data_out": "test run"
+        },
+        {
+          "step": 2,
+          "layer": "External",
+          "file": "scripts/test-cin7-api.mjs",
+          "line": 49,
+          "action": "fetch sends CIN7 headers.",
+          "data_in": "endpoint, params",
+          "data_out": "JSON or error"
+        },
+        {
+          "step": 3,
+          "layer": "Bug",
+          "file": "scripts/test-cin7-api.mjs",
+          "line": 323,
+          "action": "Env account id is stored on globalThis but callAPI still uses ACCOUNT_ID constant.",
+          "data_in": "CIN7_ACCOUNT_ID",
+          "data_out": "not used by headers"
+        }
+      ],
+      "error_handling": "Prints status and exits on failure.",
+      "auth_check": true
+    }
+  ],
+  "security": {
+    "auth_method": "Supabase Auth cookies/JWT",
+    "auth_provider": "Supabase",
+    "auth_config_file": "src/lib/supabase/",
+    "protected_routes": [
+      "/dashboard",
+      "all non-login and non-auth routes"
+    ],
+    "public_routes": [
+      "/login",
+      "/auth/callback"
+    ],
+    "middleware_file": "src/proxy.ts",
+    "rls_enabled": "planned in local migration, not applied remotely",
+    "input_validation": "browser required attributes only",
+    "csrf_protection": false,
+    "rate_limiting": false,
+    "cors_configured": false,
+    "vulnerabilities": [
+      {
+        "severity": "P0",
+        "title": "CIN7 credentials were exposed before this cleanup",
+        "evidence": [
+          "README.md and scripts/test-cin7-api.mjs previously contained plaintext values",
+          "Antigravity transcript may still contain historical values"
+        ],
+        "recommendation": "Rotate CIN7 credentials outside the repo before live sync. Current tracked README and script no longer contain those literal values."
+      },
+      {
+        "severity": "P1",
+        "title": "KRDM Supabase project not accessible through current MCP session",
+        "evidence": [
+          "list_projects only returns sjziqdbyobfekcyljgpt",
+          "get_project(cbrqfqxwexhoguoazhgh) denied in prior check"
+        ],
+        "recommendation": "Grant access to cbrqfqxwexhoguoazhgh or confirm the exact new KRDM project before applying migrations/imports."
+      },
+      {
+        "severity": "P1",
+        "title": "Production npm audit advisories remain",
+        "evidence": [
+          "npm audit --omit=dev reports high xlsx advisories and moderate PostCSS via Next"
+        ],
+        "recommendation": "Replace or isolate xlsx parsing and track Next/PostCSS patched release."
+      }
+    ]
+  },
+  "dependencies": {
+    "runtime": {
+      "@supabase/ssr": "^0.10.3",
+      "@supabase/supabase-js": "^2.108.0",
+      "date-fns": "^4.4.0",
+      "lucide-react": "^1.17.0",
+      "motion": "^12.40.0",
+      "next": "16.2.7",
+      "react": "19.2.4",
+      "react-dom": "19.2.4",
+      "recharts": "^3.8.1",
+      "xlsx": "^0.18.5"
+    },
+    "dev": {
+      "typescript": "^5",
+      "eslint": "^9",
+      "tailwindcss": "^4"
+    },
+    "audit": {
+      "status": "failed",
+      "prod_advisories": 3,
+      "high": 1,
+      "moderate": 2,
+      "notes": [
+        "xlsx has no fixAvailable in npm audit output and is used only for trusted local target workbook dry-runs right now",
+        "next is affected through bundled postcss range; npm audit suggests an invalid downgrade, so track upstream patched release"
+      ]
+    }
+  },
+  "environment": {
+    "env_files": [
+      ".env.local"
+    ],
+    "env_vars": [
+      "NEXT_PUBLIC_SUPABASE_URL",
+      "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+      "CIN7_ACCOUNT_ID",
+      "CIN7_API_KEY",
+      "CIN7_BASE_URL"
+    ],
+    "missing_docs": [
+      ".env.example",
+      ".gitignore"
+    ],
+    "hosting": "not configured",
+    "ci_cd": "none found"
+  },
+  "analysis_log": [
+    {
+      "timestamp": "2026-06-08T22:25:00+08:00",
+      "phase": "recon",
+      "action": "Ran reverse-engineering scan, read configs, source routes, dashboard components, Antigravity artifacts, and Supabase MCP project list."
+    },
+    {
+      "timestamp": "2026-06-08T22:25:00+08:00",
+      "phase": "security",
+      "action": "Verified lint passed and npm audit production advisories exist."
+    },
+    {
+      "timestamp": "2026-06-08T22:25:00+08:00",
+      "phase": "research",
+      "action": "Checked official Next.js proxy docs, Supabase SSR docs, and Cin7 Core API auth docs."
+    },
+    {
+      "timestamp": "2026-06-08T22:56:00+08:00",
+      "phase": "implementation",
+      "action": "Completed local Batch 1: secret redaction, env examples, proxy migration, local Supabase migration contract, target dry-run script, typed fixture boundary, Customer Analysis route, dashboard random-data removal, and login responsive polish."
+    },
+    {
+      "timestamp": "2026-06-08T22:56:00+08:00",
+      "phase": "verification",
+      "action": "Verified npm run lint, npm run build, npm run inspect:targets, npm audit residual advisories, protected route redirect, and Playwright login screenshots at mobile and desktop widths."
+    }
+  ]
+}

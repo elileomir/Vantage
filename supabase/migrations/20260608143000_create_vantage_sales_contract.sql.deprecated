@@ -1,0 +1,434 @@
+-- Vantage CRM local database contract.
+-- Do not apply this migration until the KRDM/Vantage Supabase project is confirmed.
+
+create extension if not exists pgcrypto;
+
+create or replace function public.set_updated_at()
+returns trigger
+language plpgsql
+as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
+
+create table if not exists public.calendar (
+  calendar_date date primary key,
+  calendar_year integer not null,
+  calendar_month integer not null check (calendar_month between 1 and 12),
+  calendar_month_name text not null,
+  calendar_quarter integer not null check (calendar_quarter between 1 and 4),
+  fiscal_year text not null,
+  fiscal_year_start integer not null,
+  fiscal_month integer not null check (fiscal_month between 1 and 12),
+  fiscal_quarter integer not null check (fiscal_quarter between 1 and 4),
+  month_start date not null,
+  month_end date not null,
+  is_weekend boolean not null,
+  is_working_day boolean not null default true,
+  holiday_name text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+insert into public.calendar (
+  calendar_date,
+  calendar_year,
+  calendar_month,
+  calendar_month_name,
+  calendar_quarter,
+  fiscal_year,
+  fiscal_year_start,
+  fiscal_month,
+  fiscal_quarter,
+  month_start,
+  month_end,
+  is_weekend,
+  is_working_day
+)
+select
+  day::date as calendar_date,
+  extract(year from day)::integer as calendar_year,
+  extract(month from day)::integer as calendar_month,
+  to_char(day, 'FMMonth') as calendar_month_name,
+  extract(quarter from day)::integer as calendar_quarter,
+  'FY' || case
+    when extract(month from day) >= 3 then extract(year from day)::integer
+    else extract(year from day)::integer - 1
+  end as fiscal_year,
+  case
+    when extract(month from day) >= 3 then extract(year from day)::integer
+    else extract(year from day)::integer - 1
+  end as fiscal_year_start,
+  ((extract(month from day)::integer + 9) % 12) + 1 as fiscal_month,
+  ceil((((extract(month from day)::integer + 9) % 12) + 1)::numeric / 3)::integer as fiscal_quarter,
+  date_trunc('month', day)::date as month_start,
+  (date_trunc('month', day) + interval '1 month - 1 day')::date as month_end,
+  extract(isodow from day) in (6, 7) as is_weekend,
+  extract(isodow from day) not in (6, 7) as is_working_day
+from generate_series(date '2024-01-01', date '2030-12-31', interval '1 day') as day
+on conflict (calendar_date) do update set
+  calendar_year = excluded.calendar_year,
+  calendar_month = excluded.calendar_month,
+  calendar_month_name = excluded.calendar_month_name,
+  calendar_quarter = excluded.calendar_quarter,
+  fiscal_year = excluded.fiscal_year,
+  fiscal_year_start = excluded.fiscal_year_start,
+  fiscal_month = excluded.fiscal_month,
+  fiscal_quarter = excluded.fiscal_quarter,
+  month_start = excluded.month_start,
+  month_end = excluded.month_end,
+  is_weekend = excluded.is_weekend,
+  is_working_day = excluded.is_working_day,
+  updated_at = now();
+
+create table if not exists public.sales (
+  id uuid primary key default gen_random_uuid(),
+  cin7_sale_id text,
+  order_number text,
+  invoice_number text,
+  order_date date,
+  invoice_date date,
+  completed_date date,
+  customer_id text,
+  customer text not null,
+  brand text,
+  product_sku text,
+  product_name text,
+  sales_rep text,
+  quantity numeric not null default 0,
+  revenue numeric not null default 0,
+  cost numeric,
+  gross_profit numeric,
+  currency text not null default 'ZAR',
+  status text,
+  source_payload jsonb not null default '{}'::jsonb,
+  synced_at timestamptz not null default now(),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint sales_nonnegative_quantity check (quantity >= 0)
+);
+
+create unique index if not exists sales_cin7_sale_id_idx
+  on public.sales (cin7_sale_id)
+  where cin7_sale_id is not null;
+
+create index if not exists sales_invoice_date_idx on public.sales (invoice_date);
+create index if not exists sales_order_date_idx on public.sales (order_date);
+create index if not exists sales_customer_idx on public.sales (customer);
+create index if not exists sales_brand_idx on public.sales (brand);
+create index if not exists sales_rep_idx on public.sales (sales_rep);
+
+create table if not exists public.sales_targets (
+  id uuid primary key default gen_random_uuid(),
+  fiscal_year text not null,
+  fiscal_year_start integer,
+  month integer not null check (month between 1 and 12),
+  month_date date not null,
+  sales_rep text not null,
+  customer text,
+  brand text,
+  target_amount numeric not null default 0,
+  yearly_forecast numeric,
+  source_file text,
+  source_sheet text,
+  source_row integer,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint sales_targets_nonnegative_target check (target_amount >= 0)
+);
+
+create unique index if not exists sales_targets_natural_key_idx
+  on public.sales_targets (
+    fiscal_year,
+    month,
+    sales_rep,
+    coalesce(customer, ''),
+    coalesce(brand, '')
+  );
+
+create index if not exists sales_targets_month_date_idx on public.sales_targets (month_date);
+create index if not exists sales_targets_customer_idx on public.sales_targets (customer);
+create index if not exists sales_targets_brand_idx on public.sales_targets (brand);
+create index if not exists sales_targets_rep_idx on public.sales_targets (sales_rep);
+
+create table if not exists public.sync_log (
+  id uuid primary key default gen_random_uuid(),
+  source text not null,
+  sync_type text not null,
+  status text not null check (status in ('started', 'succeeded', 'failed', 'partial')),
+  started_at timestamptz not null default now(),
+  completed_at timestamptz,
+  records_received integer not null default 0,
+  records_inserted integer not null default 0,
+  records_updated integer not null default 0,
+  records_failed integer not null default 0,
+  error_message text,
+  metadata jsonb not null default '{}'::jsonb,
+  created_by uuid references auth.users(id) on delete set null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+drop trigger if exists set_calendar_updated_at on public.calendar;
+create trigger set_calendar_updated_at
+before update on public.calendar
+for each row execute function public.set_updated_at();
+
+drop trigger if exists set_sales_updated_at on public.sales;
+create trigger set_sales_updated_at
+before update on public.sales
+for each row execute function public.set_updated_at();
+
+drop trigger if exists set_sales_targets_updated_at on public.sales_targets;
+create trigger set_sales_targets_updated_at
+before update on public.sales_targets
+for each row execute function public.set_updated_at();
+
+drop trigger if exists set_sync_log_updated_at on public.sync_log;
+create trigger set_sync_log_updated_at
+before update on public.sync_log
+for each row execute function public.set_updated_at();
+
+alter table public.calendar enable row level security;
+alter table public.sales enable row level security;
+alter table public.sales_targets enable row level security;
+alter table public.sync_log enable row level security;
+
+drop policy if exists "Authenticated users can read calendar" on public.calendar;
+create policy "Authenticated users can read calendar"
+on public.calendar
+for select
+to authenticated
+using (true);
+
+drop policy if exists "Authenticated users can read sales" on public.sales;
+create policy "Authenticated users can read sales"
+on public.sales
+for select
+to authenticated
+using (true);
+
+drop policy if exists "Authenticated users can read sales targets" on public.sales_targets;
+create policy "Authenticated users can read sales targets"
+on public.sales_targets
+for select
+to authenticated
+using (true);
+
+drop policy if exists "Authenticated users can read sync log" on public.sync_log;
+create policy "Authenticated users can read sync log"
+on public.sync_log
+for select
+to authenticated
+using (true);
+
+create or replace view public.v_sales_summary
+with (security_invoker = true) as
+with sales_monthly as (
+  select
+    coalesce(c.fiscal_year, 'FY' || extract(year from coalesce(s.invoice_date, s.order_date))::integer) as fiscal_year,
+    coalesce(c.fiscal_year_start, extract(year from coalesce(s.invoice_date, s.order_date))::integer) as fiscal_year_start,
+    coalesce(c.fiscal_month, extract(month from coalesce(s.invoice_date, s.order_date))::integer) as fiscal_month,
+    coalesce(c.month_start, date_trunc('month', coalesce(s.invoice_date, s.order_date))::date) as month_date,
+    coalesce(s.sales_rep, 'Unassigned') as sales_rep,
+    s.customer,
+    s.brand,
+    sum(s.revenue) as sales_amount,
+    sum(s.quantity) as quantity,
+    count(*) as line_count
+  from public.sales s
+  left join public.calendar c
+    on c.calendar_date = coalesce(s.invoice_date, s.order_date)
+  group by 1, 2, 3, 4, 5, 6, 7
+),
+targets_monthly as (
+  select
+    fiscal_year,
+    fiscal_year_start,
+    month as fiscal_month,
+    month_date,
+    sales_rep,
+    customer,
+    brand,
+    sum(target_amount) as target_amount,
+    max(yearly_forecast) as yearly_forecast
+  from public.sales_targets
+  group by 1, 2, 3, 4, 5, 6, 7
+)
+select
+  coalesce(s.fiscal_year, t.fiscal_year) as fiscal_year,
+  coalesce(s.fiscal_year_start, t.fiscal_year_start) as fiscal_year_start,
+  coalesce(s.fiscal_month, t.fiscal_month) as fiscal_month,
+  coalesce(s.month_date, t.month_date) as month_date,
+  coalesce(s.sales_rep, t.sales_rep) as sales_rep,
+  coalesce(s.customer, t.customer) as customer,
+  coalesce(s.brand, t.brand) as brand,
+  coalesce(s.sales_amount, 0) as sales_amount,
+  coalesce(t.target_amount, 0) as target_amount,
+  case
+    when coalesce(t.target_amount, 0) = 0 then null
+    else coalesce(s.sales_amount, 0) / t.target_amount
+  end as achievement_rate,
+  coalesce(s.quantity, 0) as quantity,
+  coalesce(s.line_count, 0) as line_count,
+  t.yearly_forecast
+from sales_monthly s
+full outer join targets_monthly t
+  on s.fiscal_year = t.fiscal_year
+  and s.fiscal_month = t.fiscal_month
+  and s.sales_rep = t.sales_rep
+  and coalesce(s.customer, '') = coalesce(t.customer, '')
+  and coalesce(s.brand, '') = coalesce(t.brand, '');
+
+create or replace view public.v_daily_sales
+with (security_invoker = true) as
+select
+  coalesce(s.invoice_date, s.order_date) as sales_date,
+  c.fiscal_year,
+  c.fiscal_year_start,
+  c.fiscal_month,
+  c.fiscal_quarter,
+  coalesce(s.sales_rep, 'Unassigned') as sales_rep,
+  s.customer,
+  s.brand,
+  sum(s.revenue) as sales_amount,
+  sum(s.quantity) as quantity,
+  count(*) as line_count
+from public.sales s
+left join public.calendar c
+  on c.calendar_date = coalesce(s.invoice_date, s.order_date)
+where coalesce(s.invoice_date, s.order_date) is not null
+group by 1, 2, 3, 4, 5, 6, 7, 8;
+
+create or replace view public.v_mtd_sales
+with (security_invoker = true) as
+select
+  fiscal_year,
+  fiscal_year_start,
+  fiscal_month,
+  month_date,
+  sales_rep,
+  customer,
+  brand,
+  sales_amount,
+  target_amount,
+  achievement_rate
+from public.v_sales_summary
+where month_date = date_trunc('month', current_date)::date;
+
+create or replace view public.v_ytd_sales
+with (security_invoker = true) as
+select
+  fiscal_year,
+  fiscal_year_start,
+  sales_rep,
+  customer,
+  brand,
+  sum(sales_amount) as sales_amount,
+  sum(target_amount) as target_amount,
+  case
+    when sum(target_amount) = 0 then null
+    else sum(sales_amount) / sum(target_amount)
+  end as achievement_rate
+from public.v_sales_summary
+group by 1, 2, 3, 4, 5;
+
+create or replace view public.v_target_achievement
+with (security_invoker = true) as
+select
+  fiscal_year,
+  fiscal_year_start,
+  fiscal_month,
+  month_date,
+  sales_rep,
+  customer,
+  brand,
+  sales_amount,
+  target_amount,
+  sales_amount - target_amount as variance_amount,
+  achievement_rate
+from public.v_sales_summary;
+
+create or replace view public.v_yoy_comparison
+with (security_invoker = true) as
+with monthly as (
+  select
+    fiscal_year_start,
+    fiscal_month,
+    sales_rep,
+    customer,
+    brand,
+    sum(sales_amount) as sales_amount
+  from public.v_sales_summary
+  group by 1, 2, 3, 4, 5
+)
+select
+  current_year.fiscal_year_start,
+  'FY' || current_year.fiscal_year_start as fiscal_year,
+  current_year.fiscal_month,
+  current_year.sales_rep,
+  current_year.customer,
+  current_year.brand,
+  current_year.sales_amount as current_sales_amount,
+  prior_year.sales_amount as prior_sales_amount,
+  current_year.sales_amount - coalesce(prior_year.sales_amount, 0) as yoy_variance_amount,
+  case
+    when coalesce(prior_year.sales_amount, 0) = 0 then null
+    else (current_year.sales_amount - prior_year.sales_amount) / prior_year.sales_amount
+  end as yoy_growth_rate
+from monthly current_year
+left join monthly prior_year
+  on prior_year.fiscal_year_start = current_year.fiscal_year_start - 1
+  and prior_year.fiscal_month = current_year.fiscal_month
+  and prior_year.sales_rep = current_year.sales_rep
+  and coalesce(prior_year.customer, '') = coalesce(current_year.customer, '')
+  and coalesce(prior_year.brand, '') = coalesce(current_year.brand, '');
+
+create or replace view public.v_brand_revenue
+with (security_invoker = true) as
+select
+  fiscal_year,
+  fiscal_year_start,
+  brand,
+  sum(sales_amount) as sales_amount,
+  sum(target_amount) as target_amount,
+  case
+    when sum(target_amount) = 0 then null
+    else sum(sales_amount) / sum(target_amount)
+  end as achievement_rate
+from public.v_sales_summary
+where brand is not null
+group by 1, 2, 3;
+
+create or replace view public.v_customer_revenue
+with (security_invoker = true) as
+select
+  fiscal_year,
+  fiscal_year_start,
+  customer,
+  sum(sales_amount) as sales_amount,
+  sum(target_amount) as target_amount,
+  case
+    when sum(target_amount) = 0 then null
+    else sum(sales_amount) / sum(target_amount)
+  end as achievement_rate
+from public.v_sales_summary
+where customer is not null
+group by 1, 2, 3;
+
+create or replace view public.v_rep_revenue
+with (security_invoker = true) as
+select
+  fiscal_year,
+  fiscal_year_start,
+  sales_rep,
+  sum(sales_amount) as sales_amount,
+  sum(target_amount) as target_amount,
+  case
+    when sum(target_amount) = 0 then null
+    else sum(sales_amount) / sum(target_amount)
+  end as achievement_rate
+from public.v_sales_summary
+group by 1, 2, 3;

@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+
+# Production
+build/
+dist/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Local files
+.DS_Store
+*.local
+.tmp/
+
+# Python venv (local image tooling)
+.venv/
+
+# Local PBI reference material — screenshots/pbix/branding contain business sales data
+# and the proprietary report; not used by the app. Keep local. (To track it in a PRIVATE
+# repo, force-add: `git add -f reference/`)
+reference/
+
+# Reverse-engineering temp output is project-specific and may include local paths.
+.re/tmp/
